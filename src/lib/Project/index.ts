@@ -50,10 +50,14 @@ export async function deleteProject() {
     throw error;
   }
 }
-export async function projectList(data: { search?: string }) {
+export async function projectList(data?: {
+  search?: string;
+  page?: number;
+  perPage?: number;
+}) {
   try {
     const res = await axiosInstance.get(
-      `/admin/project/list?search=${data.search}`
+      `/admin/project/list?search=${data?.search}&page=${data?.page}&pageSize=${data?.perPage}`
     );
     return res.data;
   } catch (error) {

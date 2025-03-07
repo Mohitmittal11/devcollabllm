@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { useFormik } from "formik";
 // import { useAuthStore } from "../store/authStore";
@@ -14,7 +15,7 @@ const Settings: React.FC = () => {
   // });
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  // const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const { name, value } = e.target;
@@ -71,15 +72,21 @@ const Settings: React.FC = () => {
       newPassword: string;
       confirmPassword: string;
     }) => {
-      setIsLoading(true);
-      const bodyData = {
-        newPassword: values.confirmPassword,
-        password: values.currentPassword,
-      };
-      const res = await ChangePassword(bodyData);
-      if (res.code == 200) {
-        setSuccessMessage("Password Updated Successfully");
-        resetForm();
+      try {
+        setIsLoading(true);
+        const bodyData = {
+          newPassword: values.confirmPassword,
+          password: values.currentPassword,
+        };
+        const res = await ChangePassword(bodyData);
+        if (res.code == 200) {
+          setSuccessMessage("Password Updated Successfully");
+          resetForm();
+          setIsLoading(false);
+          setErrorMessage("");
+        }
+      } catch (error: any) {
+        setErrorMessage(error.response.data.message);
         setIsLoading(false);
       }
     },
@@ -104,11 +111,11 @@ const Settings: React.FC = () => {
               </div>
             )}
 
-            {/* {errorMessage && (
+            {errorMessage && (
               <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-md">
                 {errorMessage}
               </div>
-            )} */}
+            )}
 
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">

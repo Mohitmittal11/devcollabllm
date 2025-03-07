@@ -36,9 +36,7 @@ const DeleteDeveloper: React.FC<DeleteModalProps> = ({
           </h2>
 
           <p className="text-gray-600 mb-6">
-            Are you sure you want to delete{" "}
-            <span className="font-medium">Mohit</span>? This action cannot be
-            undone.
+            Are you sure you want to delete ?
           </p>
 
           <div className="flex justify-end space-x-3">

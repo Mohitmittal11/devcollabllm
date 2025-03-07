@@ -125,7 +125,7 @@ const AddDeveloper: React.FC<AddDeveloperProps> = ({
                     <span className="font-medium">Email:</span>{" "}
                     {registerUserDetails?.email}
                   </p>
-                  <div className="flex items-center gap-5 overflow-x-auto break-all">
+                  <div className="flex justify-between items-center gap-5 overflow-x-auto break-all">
                     <p className="text-sm text-gray-700 ">
                       <span className="font-medium">Password:</span>{" "}
                       {generatedPassword}
