@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { useFormik } from "formik";
@@ -21,7 +22,7 @@ const Projects: React.FC = () => {
   const perPage = 9;
 
   useEffect(() => {
-    fetchProject({ page: page, perPage: perPage, search: "" });
+    fetchProject({ page: page, perPage: perPage, search: searchTerm });
   }, [page]);
 
   const fetchProject = async (data?: {
