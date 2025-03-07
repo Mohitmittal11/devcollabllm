@@ -24,6 +24,7 @@ const axiosInstance = axios.create({
 // Request interceptor to attach token and language to every request
 axiosInstance.interceptors.request.use(
   (config: AxiosRequestConfig): any => {
+    console.log("Config is ", config);
     if (config.headers) {
       const cookies = document.cookie.split("; ");
       const token = cookies
@@ -38,7 +39,7 @@ axiosInstance.interceptors.request.use(
         config.headers["role"] = `${role}`;
       }
     }
-    if (config.data) {
+    if (config.data && config.method !== "get") {
       const cookies = document.cookie.split("; ");
       const role = cookies
         .find((row) => row.startsWith("role="))
