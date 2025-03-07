@@ -1,6 +1,7 @@
 {
   "files": [],
   "compilerOptions": {
+    "module": "ESNext",
     "moduleResolution": "node"
   },
   "references": [
