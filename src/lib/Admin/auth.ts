@@ -2,20 +2,30 @@
 import useAuthStore from "../../store/authStore";
 import type { AdminLogin } from "../../ts/Interfaces/Admin/auth";
 import axiosInstance from "../axiosInstance";
-import axios from "axios";
 const setAuthData = useAuthStore.getState().setAuthData;
 
 export async function AdminLogin(bodyData: AdminLogin) {
   try {
-    const res = await axios.post(
-      `https://devcollab-ai.onrender.com/api/v1/admin/auth/login`,
-      bodyData
+    const res = await fetch(
+      "https://devcollab-ai.onrender.com/api/v1/admin/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          deviceType: "web",
+        },
+        body: JSON.stringify(bodyData),
+      }
     );
-    document.cookie = `token=${res?.data?.token}; path=/;`;
-    document.cookie = `role=${res?.data?.role}; path=/;`;
-
-    setAuthData(res?.data);
-    return res.data;
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json();
+    document.cookie = `token=${data?.token}; path=/;`;
+    document.cookie = `role=${data?.role}; path=/;`;
+    setAuthData(data);
+    return data;
   } catch (error) {
     throw error;
   }
