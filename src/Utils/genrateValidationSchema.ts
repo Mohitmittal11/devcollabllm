@@ -5,7 +5,7 @@ export const loginValidationSchema = () => {
     email: Yup.string().email().required("Email is Required"),
     password: Yup.string()
       .required("Password is Required")
-      .min(4, "Password must be of at least 4 Digits"),
+      .min(6, "Password must be of at least 6 Digits"),
   });
 };
 
@@ -16,13 +16,13 @@ export const PasswordValidationSchema = () => {
     // confirmPassword: "",
     currentPassword: Yup.string()
       .required("Password is Required")
-      .min(4, "Password must be of at least 4 Digits"),
+      .min(6, "Password must be of at least 6 Digits"),
     newPassword: Yup.string()
       .required("New Password is Required")
-      .min(4, "Password must be of at least 4 Digits"),
+      .min(6, "Password must be of at least 6 Digits"),
     confirmPassword: Yup.string()
       .required("Confirm Password is Required")
-      .min(4, "Password must be of at least 4 Digits")
+      .min(6, "Password must be of at least 6 Digits")
       .oneOf([Yup.ref("newPassword")], "Password Must Be Matched"),
   });
 };

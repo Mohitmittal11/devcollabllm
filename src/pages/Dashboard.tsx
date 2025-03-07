@@ -1,33 +1,35 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useProjectStore } from "../store/projectStore";
+// import { useProjectStore } from "../store/projectStore";
 // import { useAuthStore } from "../store/authStore";
-import { Calendar, Code2, MessageSquare } from "lucide-react";
+import { Calendar, Clock, Code2, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import useAuthStore from "../store/authStore";
+import { projectList } from "../lib/Project";
+import { Project } from "../ts/Interfaces/Project";
 
 const Dashboard: React.FC = () => {
-  const { fetchProjects } = useProjectStore();
   const { authData } = useAuthStore();
+  const [project, setProject] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   // const { user } = useAuthStore();
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+  }, []);
 
-  // Filter projects based on user role
-  // const userProjects =
-  //   user?.role === "admin"
-  //     ? projects
-  //     : projects.filter((project) => project.members.includes(user?.id || ""));
-
-  // Get recent projects (last 3)
-  // const recentProjects = [...userProjects]
-  //   .sort(
-  //     (a, b) =>
-  //       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  //   )
-  //   .slice(0, 3);
+  const fetchProjects = async () => {
+    try {
+      const res = await projectList({ search: "", page: 1, perPage: 3 });
+      if (res.code == 200) {
+        setProject(res.data.response);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.log("Error is ", error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -92,16 +94,16 @@ const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        {/* {isLoading ? (
+        {isLoading ? (
           <div className="text-center py-8">
             <p className="text-gray-500">Loading projects...</p>
           </div>
-        ) : recentProjects.length > 0 ? (
+        ) : project.length > 0 ? (
           <div className="space-y-4">
-            {recentProjects.map((project) => (
+            {project.map((project) => (
               <Link
-                key={project.id}
-                to={`/projects/${project.id}`}
+                key={project._id}
+                to={`/projects/${project._id}`}
                 className="block bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -109,7 +111,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock className="h-4 w-4 mr-1" />
                     <span>
-                      {format(new Date(project.updatedAt), "MMM d, yyyy")}
+                      {format(new Date(project.createdAt), "MMM d, yyyy")}
                     </span>
                   </div>
                 </div>
@@ -129,7 +131,7 @@ const Dashboard: React.FC = () => {
               Create your first project
             </Link>
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );
