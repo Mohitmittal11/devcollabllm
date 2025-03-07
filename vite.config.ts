@@ -1,16 +1,18 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: ["lucide-react"],
-    include: ["axios"],
+    include: ["axios"], // Keep this
+  },
+  resolve: {
+    alias: {
+      axios: "axios", // Add this alias
+    },
   },
   build: {
     rollupOptions: {
-      external: ["axios"], // Ensure axios is treated as an external dependency
+      external: [], // Remove axios from external
     },
   },
 });
