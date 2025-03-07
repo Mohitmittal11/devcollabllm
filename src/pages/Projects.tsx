@@ -32,8 +32,8 @@ const Projects: React.FC = () => {
     try {
       const response = await projectList({
         search: data?.search || "",
-        page: data?.page,
-        perPage: data?.perPage,
+        page: data?.page || 1,
+        perPage: data?.perPage || 9,
       });
       if (response.code == 200) {
         setProject(response.data.response);
@@ -64,10 +64,13 @@ const Projects: React.FC = () => {
         }
         const res = await addProject(bodydata);
         if (res.code == 201) {
-          await fetchProject();
+          await fetchProject({
+            page: page,
+            perPage: perPage,
+          });
           setShowCreateModal(false);
+          resetForm();
           setIsProjectAdding(false);
-
           toast.success("Project Added Successfully");
         }
       } catch (error: any) {
@@ -77,7 +80,8 @@ const Projects: React.FC = () => {
     },
   });
 
-  const { handleSubmit, errors, touched, setFieldValue, values } = formik;
+  const { handleSubmit, errors, touched, setFieldValue, resetForm, values } =
+    formik;
 
   const handlePageClick = useCallback((page: { selected: number }) => {
     setPage(page.selected + 1);
@@ -102,10 +106,11 @@ const Projects: React.FC = () => {
                     return;
                   } else if (e.code == "Enter") {
                     fetchProject({
-                      page: page,
+                      page: 1,
                       perPage: perPage,
                       search: searchTerm,
                     });
+                    setPage(1);
                   }
                 }}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
