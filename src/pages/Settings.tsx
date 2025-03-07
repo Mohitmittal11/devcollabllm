@@ -79,11 +79,9 @@ const Settings: React.FC = () => {
       const res = await ChangePassword(bodyData);
       if (res.code == 200) {
         setSuccessMessage("Password Updated Successfully");
-        console.log("Hello");
         resetForm();
         setIsLoading(false);
       }
-      console.log("responseof change password is ", res);
     },
   });
   const { handleSubmit, errors, touched, setFieldValue, resetForm, values } =

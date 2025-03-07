@@ -33,3 +33,10 @@ export const projectValidationSchema = () => {
     description: Yup.string(),
   });
 };
+
+export const addDeveloperValidationSchema = () => {
+  return Yup.object().shape({
+    name: Yup.string().required("Name is Required"),
+    email: Yup.string().email().required("Email is Required"),
+  });
+};

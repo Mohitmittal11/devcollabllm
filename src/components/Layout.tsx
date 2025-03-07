@@ -1,25 +1,39 @@
 import React from "react";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 // import { useAuthStore } from '../store/authStore';
-import { LogOut, User, Settings, Code2, LayoutDashboard } from "lucide-react";
+import {
+  LogOut,
+  User,
+  Settings,
+  Code2,
+  LayoutDashboard,
+  Users,
+} from "lucide-react";
 import useAuthStore from "../store/authStore";
+import { AdminLogout } from "../lib/Admin/auth";
 
 const Layout: React.FC = () => {
-  // const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuthData, authData } = useAuthStore();
+  const cookies = document.cookie.split("; ");
 
-  const handleLogout = () => {
-    setAuthData(null);
-    document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-    document.cookie = "role=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-    navigate("/login");
+  const role = cookies.find((row) => row.startsWith("role="))?.split("=")[1];
+
+  const handleLogout = async () => {
+    try {
+      const res = await AdminLogout();
+      if (res.code == 200) {
+        setAuthData(null);
+        document.cookie =
+          "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+        document.cookie = "role=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+        navigate("/login");
+      }
+    } catch (err) {
+      console.log("error is ", err);
+    }
   };
-
-  // if (!user) {
-  //   return <Outlet />;
-  // }
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -60,7 +74,7 @@ const Layout: React.FC = () => {
             Projects
           </Link>
 
-          {/* {user.role === "admin" && (
+          {role === "Admin" && (
             <Link
               to="/admin/developers"
               className={`flex items-center px-4 py-3 ${
@@ -72,7 +86,7 @@ const Layout: React.FC = () => {
               <Users className="h-5 w-5 mr-3" />
               Manage Developers
             </Link>
-          )} */}
+          )}
 
           <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-400 uppercase">
             Account

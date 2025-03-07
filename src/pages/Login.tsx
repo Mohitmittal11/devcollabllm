@@ -28,6 +28,7 @@ const Login: React.FC = () => {
         }
         setIsLoading(false);
       } catch (error: any) {
+        console.log("Error is ", error);
         setError(error.response.data.message);
         setIsLoading(false);
       } finally {
