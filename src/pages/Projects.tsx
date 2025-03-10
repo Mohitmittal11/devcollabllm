@@ -101,11 +101,25 @@ const Projects: React.FC = () => {
                 type="text"
                 placeholder="Search projects..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  if (e.target.value == "") {
+                    fetchProject({
+                      page: 1,
+                      perPage: perPage,
+                      search: e.target.value,
+                    });
+                    setPage(1);
+                  }
+                }}
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.code == "Space" && !searchTerm) {
                     return;
-                  } else if (e.code == "Enter") {
+                  } else if (
+                    e.code == "Enter" &&
+                    e.currentTarget.value &&
+                    searchTerm
+                  ) {
                     fetchProject({
                       page: 1,
                       perPage: perPage,

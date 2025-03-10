@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useState } from "react";
 import { Edit, Plus, Trash, UserIcon } from "lucide-react";
 import AddDeveloper from "../components/modal/addDeveloper";
-import { ListUser, userDetails } from "../lib/Admin/user";
+import { ListUser, userDetails, UserStatusChange } from "../lib/Admin/user";
 import { UserInterface } from "../ts/Interfaces/User";
 import DeleteDeveloper from "../components/modal/DeleteDeveloper";
+import ToggleOne from "../components/Toggle";
+import Pagination from "../components/Pagination";
 
 const AdminDevelopers: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -13,20 +17,38 @@ const AdminDevelopers: React.FC = () => {
   const [details, setDetails] = useState<UserInterface | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [deleteUserId, setDeleteUserId] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [totalCount, setTotalCount] = useState<number>(0);
+
+  const perPage = 10;
 
   useEffect(() => {
-    fetchDevelopers();
-  }, []);
+    fetchDevelopers({ page: page, perPage: perPage });
+  }, [page]);
 
-  const fetchDevelopers = async () => {
+  const fetchDevelopers = async (data: {
+    page: number;
+    perPage: number;
+    search?: string;
+  }) => {
     try {
-      const res = await ListUser();
+      let paramsData: any = {
+        page: data.page,
+        perPage: data.perPage,
+      };
+      if (data.search) {
+        paramsData = { ...paramsData, search: data?.search };
+      }
+      const res = await ListUser(paramsData);
       if (res.code == 200) {
         setUserList(res.data.response);
+        setTotalCount(res.data.Total);
         setIsLoading(false);
+        setErrorMessage("");
       }
-    } catch (error) {
-      console.log("error os ", error);
+    } catch (error: any) {
+      setErrorMessage(error.response.data.message);
       setIsLoading(false);
     }
   };
@@ -47,7 +69,22 @@ const AdminDevelopers: React.FC = () => {
     setShowDeleteModal(true);
   };
   const fetchData = useCallback(() => {
-    fetchDevelopers();
+    fetchDevelopers({ page: page, perPage: perPage });
+  }, []);
+
+  const handleStatusChange = async (status: boolean, id: string) => {
+    try {
+      const res = await UserStatusChange(id, status);
+      if (res.code == 200) {
+        fetchDevelopers({ page: page, perPage: perPage });
+      }
+    } catch (error) {
+      console.log("Error is ", error);
+    }
+  };
+
+  const handlePageClick = useCallback(async (page: { selected: number }) => {
+    setPage(page.selected + 1);
   }, []);
 
   return (
@@ -61,8 +98,28 @@ const AdminDevelopers: React.FC = () => {
               type="text"
               placeholder="Search developers..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                if (e.target.value == "") {
+                  fetchDevelopers({
+                    page: 1,
+                    perPage: perPage,
+                    search: e.target.value,
+                  });
+                  setPage(1);
+                }
+              }}
               disabled={userList.length ? false : true}
+              onKeyDown={(e) => {
+                if (e.key == "Enter" && e.currentTarget.value && searchTerm) {
+                  fetchDevelopers({
+                    page: 1,
+                    perPage: perPage,
+                    search: searchTerm,
+                  });
+                  setPage(1);
+                }
+              }}
               className="pl-4 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           </div>
@@ -82,7 +139,7 @@ const AdminDevelopers: React.FC = () => {
         <div className="text-center py-12">
           <p className="text-gray-500">Loading developers...</p>
         </div>
-      ) : userList.length > 0 ? (
+      ) : userList.length > 0 && !errorMessage ? (
         <div className="bg-white rounded-lg shadow-sm overflow-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -98,6 +155,12 @@ const AdminDevelopers: React.FC = () => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Email
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status
                 </th>
                 <th
                   scope="col"
@@ -137,6 +200,16 @@ const AdminDevelopers: React.FC = () => {
                       {developer.email}
                     </div>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <ToggleOne
+                      id={developer._id}
+                      name={"status"}
+                      state={developer.isActive}
+                      onChange={(newState: boolean) =>
+                        handleStatusChange(newState, developer._id)
+                      }
+                    />
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => {
@@ -169,11 +242,11 @@ const AdminDevelopers: React.FC = () => {
             No developers found
           </h2>
           <p className="text-gray-600 mb-6">
-            {searchTerm
+            {searchTerm && !userList.length
               ? "Try adjusting your search terms"
               : "Get started by adding your first developer"}
           </p>
-          {!searchTerm && (
+          {!searchTerm && !userList.length && (
             <button
               onClick={() => setShowAddModal(true)}
               className="inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
@@ -201,6 +274,15 @@ const AdminDevelopers: React.FC = () => {
           setShowDeleteModal={setShowDeleteModal}
           deleteUserId={deleteUserId}
           fetchData={fetchData}
+        />
+      )}
+
+      {totalCount > perPage && (
+        <Pagination
+          page={page}
+          perPage={perPage}
+          totalCount={totalCount}
+          handlePageClick={handlePageClick}
         />
       )}
     </div>

@@ -1,11 +1,17 @@
 /* eslint-disable no-useless-catch */
 import axiosInstance from "../axiosInstance";
 
-export async function ChatList(data: { role?: string; projectId?: string }) {
+export async function ChatList(data: {
+  id?: string;
+  role?: string;
+  search?: string;
+}) {
   try {
-    const res = await axiosInstance.get(
-      `/user/llm/list?role=${data.role}&projectId=${data.projectId}`
-    );
+    let url = `/user/llm/list?role=${data.role}&projectId=${data?.id}`;
+    if (data.search) {
+      url = `/user/llm/list?role=${data.role}&projectId=${data?.id}&search=${data.search}`;
+    }
+    const res = await axiosInstance.get(url);
     return res.data;
   } catch (error) {
     throw error;
