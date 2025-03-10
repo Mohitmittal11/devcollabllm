@@ -1,22 +1,34 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// import { useProjectStore } from "../store/projectStore";
-// import { useAuthStore } from "../store/authStore";
 import { Calendar, Clock, Code2, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import useAuthStore from "../store/authStore";
 import { projectList } from "../lib/Project";
 import { Project } from "../ts/Interfaces/Project";
+import { getDashboard } from "../lib/Admin/user";
 
 const Dashboard: React.FC = () => {
   const { authData } = useAuthStore();
   const [project, setProject] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // const { user } = useAuthStore();
+  const [dashboard, setDashboard] = useState<any>();
 
   useEffect(() => {
     fetchProjects();
+    dashboardAPI();
   }, []);
+
+  const dashboardAPI = async () => {
+    try {
+      const res = await getDashboard();
+      if (res.code == 200) {
+        setDashboard(res.data);
+      }
+    } catch (error) {
+      console.log("eror is", error);
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -51,7 +63,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-3xl font-bold text-gray-900">
-            {/* {userProjects.length} */}
+            {dashboard?.projectCount}
           </div>
           <p className="text-gray-600 text-sm mt-1">Active projects</p>
         </div>
@@ -76,7 +88,9 @@ const Dashboard: React.FC = () => {
               <MessageSquare className="h-5 w-5 text-purple-600" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-gray-900">24</div>
+          <div className="text-3xl font-bold text-gray-900">
+            {dashboard?.chatMessageCount}
+          </div>
           <p className="text-gray-600 text-sm mt-1">AI interactions today</p>
         </div>
       </div>

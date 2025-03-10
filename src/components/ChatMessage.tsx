@@ -11,7 +11,12 @@ const ChatMessage: React.FC<any> = ({ message }) => {
         reponseRef.current.innerText || reponseRef.current.textContent;
       navigator.clipboard
         .writeText(textToCopy)
-        .then(() => setCopy(true))
+        .then(() => {
+          setCopy(true);
+          setTimeout(() => {
+            setCopy(false);
+          }, 3000);
+        })
         .catch((err) => console.error("Failed to copy:", err));
     }
   };
@@ -26,7 +31,11 @@ const ChatMessage: React.FC<any> = ({ message }) => {
         <p className="text-xs font-medium text-gray-400">{message.time}</p>
       </div>
 
-      {message.response && (
+      {message.response == "hello" ? (
+        <p className="text-4xl mt-16 text-black tracking-widest animate-pulse">
+          ...
+        </p>
+      ) : (
         <div className="w-full h-full mt-16 border border-gray-500 bg-gray-900 text-white p-6 pt-12 rounded-lg overflow-auto relative">
           <div ref={reponseRef}>
             <ReactMarkdown>{message.response}</ReactMarkdown>

@@ -1,65 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { useFormik } from "formik";
-// import { useAuthStore } from "../store/authStore";
 import { Lock, Save } from "lucide-react";
 import { PasswordValidationSchema } from "../Utils/genrateValidationSchema";
 import { ChangePassword } from "../lib/Admin/auth";
 
 const Settings: React.FC = () => {
-  // const { changePassword } = useAuthStore();
-  // const [formData, setFormData] = useState({
-  //   currentPassword: "",
-  //   newPassword: "",
-  //   confirmPassword: "",
-  // });
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  // };
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-  //   setSuccessMessage("");
-  //   setErrorMessage("");
-
-  //   // Validate passwords match
-  //   if (formData.newPassword !== formData.confirmPassword) {
-  //     setErrorMessage("New passwords do not match");
-  //     setIsLoading(false);
-  //     return;
-  //   }
-
-  //   // Validate password strength
-  //   if (formData.newPassword.length < 8) {
-  //     setErrorMessage("Password must be at least 8 characters long");
-  //     setIsLoading(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     // await changePassword(formData.currentPassword, formData.newPassword);
-
-  //     setSuccessMessage("Password changed successfully");
-  //     setFormData({
-  //       currentPassword: "",
-  //       newPassword: "",
-  //       confirmPassword: "",
-  //     });
-  //   } catch (error) {
-  //     console.log("error", error);
-  //     setErrorMessage(
-  //       "Failed to change password. Please check your current password."
-  //     );
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const formik = useFormik({
     initialValues: {
       currentPassword: "",

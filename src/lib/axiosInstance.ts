@@ -24,7 +24,6 @@ const axiosInstance = axios.create({
 // Request interceptor to attach token and language to every request
 axiosInstance.interceptors.request.use(
   (config: AxiosRequestConfig): any => {
-    console.log("Config is ", config);
     if (config.headers) {
       const cookies = document.cookie.split("; ");
       const token = cookies

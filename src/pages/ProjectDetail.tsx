@@ -11,6 +11,7 @@ import { Send, Search, Clock, ArrowDown } from "lucide-react";
 import { LLMModel } from "../types";
 import { Chat, ChatList } from "../lib/Chat";
 import { ChatInterface } from "../ts/Interfaces/Chat";
+import { toast } from "react-toastify";
 
 const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -38,6 +39,7 @@ const ProjectDetail: React.FC = () => {
       fetchChatList(projectDetails?.projectId);
     }
   }, [projectDetails]);
+
   const fetchProjectDetails = async (id: string) => {
     try {
       const res = await detailProject(id);
@@ -76,13 +78,16 @@ const ProjectDetail: React.FC = () => {
     },
   ];
 
-  const fetchChatList = async (id?: string) => {
+  const fetchChatList = async (id?: string, search?: string) => {
     try {
-      setIsChatLoading(true);
-      const response = await ChatList({
+      let paramsData: any = {
+        id: id,
         role: role,
-        projectId: id,
-      });
+      };
+      if (search) {
+        paramsData = { ...paramsData, search: search };
+      }
+      const response = await ChatList(paramsData);
       if (response.code == 200) {
         setChatList(response.data.response);
         setIsChatLoading(false);
@@ -99,27 +104,49 @@ const ProjectDetail: React.FC = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    const chatBodyData = {
-      query: messageInput,
-      modelType: selectedModel,
-      role: role,
-      projectId: projectDetails?.projectId,
-    };
-    const newMessage = {
-      message: messageInput,
-      time: new Date().toLocaleTimeString(),
-      response: "",
-    };
+    try {
+      const chatBodyData = {
+        query: messageInput,
+        modelType: selectedModel,
+        role: role,
+        projectId: projectDetails?.projectId,
+      };
 
-    setChatList((prev: any) => [...prev, newMessage]);
-    setMessageInput("");
+      const newMessage = {
+        message: messageInput,
+        time: new Date().toLocaleTimeString(),
+        response: "hello", // Initially empty
+      };
 
-    const response = await Chat(chatBodyData);
+      // Add new message to chatList
+      setChatList((prev: any) => [...prev, newMessage]);
+      setMessageInput("");
 
-    if (response.code == 201) {
-      setChatList(response.data);
-      fetchChatList(projectDetails?.projectId);
+      const response = await Chat(chatBodyData);
+
+      if (response.code === 201) {
+        setChatList((prev: any) => {
+          const updatedChatList = [...prev];
+          updatedChatList[updatedChatList.length - 1].response =
+            response.data.response;
+          return updatedChatList;
+        });
+      }
+    } catch (error: any) {
+      toast.error("Rate limit Exceeded, Please Try After some time");
+      setTimeout(() => {
+        if (chatList.length > 1) {
+          fetchChatList(projectDetails?.projectId);
+        } else {
+          window.location.reload();
+        }
+      }, 1000);
+      console.log("Error is ", error);
     }
+  };
+
+  const handleSearch = (search: string) => {
+    fetchChatList(projectDetails?.projectId, search);
   };
 
   return (
@@ -139,22 +166,28 @@ const ProjectDetail: React.FC = () => {
 
           <div className="flex-1 flex gap-6">
             {/* Chat section */}
-            <div className="flex-1 flex flex-col bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="flex-1 flex flex-col bg-white rounded-lg shadow-sm overflow-auto">
               {/* Search bar */}
               <div className="p-4 border-b">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+
                   <input
                     type="text"
                     placeholder="Search in conversation..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    // onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      if (!e.target.value) {
+                        fetchChatList(projectDetails?.projectId);
+                      }
+                    }}
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+
                   {searchTerm && (
                     <button
-                      // onClick={isSearching ? clearSearch : handleSearch}
+                      onClick={() => handleSearch(searchTerm)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
                       {isSearching ? "Clear" : "Search"}
@@ -248,6 +281,11 @@ const ProjectDetail: React.FC = () => {
                         onChange={(e) =>
                           setMessageInput(e.target.value.trimStart())
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && e.currentTarget.value) {
+                            handleSendMessage(e);
+                          }
+                        }}
                         placeholder="Ask a question or request code help..."
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                         rows={3}
