@@ -133,9 +133,13 @@ const ProjectDetail: React.FC = () => {
         });
       }
     } catch (error: any) {
-      toast.error(error?.response.data.message);
+      toast.error("Rate limit Exceeded, Please Try After some time");
       setTimeout(() => {
-        fetchChatList(projectDetails?.projectId);
+        if (chatList.length > 1) {
+          fetchChatList(projectDetails?.projectId);
+        } else {
+          window.location.reload();
+        }
       }, 1000);
       console.log("Error is ", error);
     }
