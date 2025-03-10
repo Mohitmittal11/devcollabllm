@@ -11,7 +11,12 @@ const ChatMessage: React.FC<any> = ({ message }) => {
         reponseRef.current.innerText || reponseRef.current.textContent;
       navigator.clipboard
         .writeText(textToCopy)
-        .then(() => setCopy(true))
+        .then(() => {
+          setCopy(true);
+          setTimeout(() => {
+            setCopy(false);
+          }, 3000);
+        })
         .catch((err) => console.error("Failed to copy:", err));
     }
   };
